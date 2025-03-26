@@ -4,12 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulário Flamengo e Iron Maiden</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Arquivo CSS externo -->
+    <link rel="stylesheet" href="styles.css">
+    <script src="validar.js"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Logo do Flamengo -->
-        <div class="logo left-logo">
+        <!-- Container das Logos (Mobile) -->
+        <div class="logos-top">
+            <div class="logo left-logo">
+                <img src="flamengo-logo.png" alt="Flamengo Logo">
+            </div>
+            <div class="logo right-logo">
+                <img src="ironmaiden-logo.png" alt="Iron Maiden Logo">
+            </div>
+        </div>
+
+        <!-- Logo do Flamengo (Desktop) -->
+        <div class="logo left-logo desktop-logo">
             <img src="flamengo-logo.png" alt="Flamengo Logo">
         </div>
 
@@ -17,23 +28,18 @@
         <div class="form-container">
             <h1>Formulário do Mr.Prince</h1>
             <form id="formulario">
-                <!-- Campo Nome -->
                 <label for="nome">Nome:</label>
                 <input type="text" id="nome" name="nome" placeholder="Digite seu nome completo" required>
 
-                <!-- Campo CPF -->
                 <label for="cpf">CPF:</label>
                 <input type="text" id="cpf" name="cpf" placeholder="Digite seu CPF (apenas números)" required>
 
-                <!-- Campo Telefone -->
                 <label for="telefone">Telefone:</label>
                 <input type="tel" id="telefone" name="telefone" placeholder="Digite seu telefone com DDD" required>
 
-                <!-- Campo Email -->
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" placeholder="Digite seu email" required>
 
-                <!-- Campo Estado -->
                 <label for="estado">Estado:</label>
                 <select id="estado" name="estado" required>
                     <option value="">Selecione seu estado</option>
@@ -44,15 +50,12 @@
                     <option value="SP">São Paulo</option>
                 </select>
 
-                <!-- Campo CEP -->
                 <label for="cep">CEP:</label>
                 <input type="text" id="cep" name="cep" placeholder="Digite seu CEP (apenas números)" required>
 
-                <!-- Campo Endereço -->
                 <label for="endereco">Endereço:</label>
                 <input type="text" id="endereco" name="endereco" placeholder="Digite seu endereço completo" required>
 
-                <!-- Botões no canto inferior direito -->
                 <div class="buttons">
                     <button type="button" onclick="salvar()">Salvar</button>
                     <button type="button" onclick="excluir()">Excluir</button>
@@ -61,8 +64,8 @@
             </form>
         </div>
 
-        <!-- Logo do Iron Maiden -->
-        <div class="logo right-logo">
+        <!-- Logo do Iron Maiden (Desktop) -->
+        <div class="logo right-logo desktop-logo">
             <img src="ironmaiden-logo.png" alt="Iron Maiden Logo">
         </div>
     </div>
