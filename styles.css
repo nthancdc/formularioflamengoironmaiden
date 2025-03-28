@@ -1,4 +1,5 @@
 /* ===== ESTILOS GERAIS ===== */
+
 * {
     margin: 0;
     padding: 0;
@@ -90,6 +91,11 @@ form select {
 
 .buttons button:hover {
     transform: scale(1.05);
+}
+
+.erro{
+    border: 2px solid red;
+    background-color: rgb(212, 76, 76);
 }
 
 /* ===== LAYOUT MOBILE ===== */
