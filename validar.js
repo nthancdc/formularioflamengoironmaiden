@@ -1,305 +1,231 @@
-// validar.js
 
-// Função que roda quando a página termina de carregar
-window.onload = function() {
-    // Configura as máscaras para os campos
+// Variável para controle do CEP
+let cepValido = false;
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Configura máscaras
     configurarMascaras();
     
-    // Configura os eventos dos botões
-    configurarBotoes();
-};
+    // Evento de submit
+    document.getElementById('formulario').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (validarFormulario()) {
+            alert('Formulário enviado com sucesso!');
+            this.reset();
+            cepValido = false;
+        }
+    });
+});
 
-// Configura as máscaras para CPF, telefone e CEP
+// Configura todas as máscaras
 function configurarMascaras() {
-    // Máscara para CPF (formato: 000.000.000-00)
-    document.getElementById('cpf').addEventListener('input', function() {
-        // Remove tudo que não é número
-        let valor = this.value.replace(/\D/g, '');
-        
-        // Aplica a formatação
-        if (valor.length > 3) valor = valor.replace(/^(\d{3})/, '$1.');
-        if (valor.length > 7) valor = valor.replace(/^(\d{3})\.(\d{3})/, '$1.$2.');
-        if (valor.length > 11) valor = valor.replace(/^(\d{3})\.(\d{3})\.(\d{3})/, '$1.$2.$3-');
-        
-        // Limita o tamanho
-        valor = valor.substring(0, 14);
-        this.value = valor;
+    // CPF: 000.000.000-00
+    document.getElementById('cpf').addEventListener('input', function(e) {
+        e.target.value = e.target.value
+            .replace(/\D/g, '')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+            .substring(0, 14);
     });
 
-    // Máscara para telefone (formato: (00) 00000-0000)
-    document.getElementById('telefone').addEventListener('input', function() {
-        // Remove tudo que não é número
-        let valor = this.value.replace(/\D/g, '');
-        
-        // Aplica a formatação
-        if (valor.length > 0) valor = valor.replace(/^(\d{0,2})/, '($1');
-        if (valor.length > 3) valor = valor.replace(/^\((\d{2})/, '($1) ');
-        if (valor.length > 10) valor = valor.replace(/^\((\d{2})\)\s(\d{5})/, '($1) $2-');
-        
-        // Limita o tamanho
-        valor = valor.substring(0, 15);
-        this.value = valor;
+    // RG: 00.000.000-0
+    document.getElementById('rg').addEventListener('input', function(e) {
+        e.target.value = e.target.value
+            .replace(/\D/g, '')
+            .replace(/(\d{2})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d{1})$/, '$1-$2')
+            .substring(0, 12);
     });
 
-    // Máscara para CEP (formato: 00000-000)
-    document.getElementById('cep').addEventListener('input', function() {
-        // Remove tudo que não é número
-        let valor = this.value.replace(/\D/g, '');
-        
-        // Aplica a formatação
-        if (valor.length > 5) valor = valor.replace(/^(\d{5})/, '$1-');
-        
-        // Limita o tamanho
-        valor = valor.substring(0, 9);
-        this.value = valor;
-        
-        // Quando o campo perde o foco, busca o endereço se o CEP estiver completo
-        this.addEventListener('blur', function() {
-            if (this.value.replace(/\D/g, '').length === 8) {
-                buscarEndereco(this.value.replace(/\D/g, ''));
-            }
-        });
+    // CNPJ: 00.000.000/0000-00
+    document.getElementById('cnpj').addEventListener('input', function(e) {
+        e.target.value = e.target.value
+            .replace(/\D/g, '')
+            .replace(/(\d{2})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1/$2')
+            .replace(/(\d{4})(\d)/, '$1-$2')
+            .substring(0, 18);
     });
+
+    // Telefone: (00) 00000-0000
+    document.getElementById('telefone').addEventListener('input', function(e) {
+        e.target.value = e.target.value
+            .replace(/\D/g, '')
+            .replace(/^(\d{2})(\d)/, '($1) $2')
+            .replace(/(\d{5})(\d)/, '$1-$2')
+            .substring(0, 15);
+    });
+
+    // CEP: 00000-000
+    document.getElementById('cep').addEventListener('input', function(e) {
+        cepValido = false;
+        e.target.value = e.target.value
+            .replace(/\D/g, '')
+            .replace(/^(\d{5})(\d)/, '$1-$2')
+            .substring(0, 9);
+    });
+
+    // Cartão: 0000 0000 0000 0000
+    document.getElementById('cartao').addEventListener('input', function(e) {
+        e.target.value = e.target.value
+            .replace(/\D/g, '')
+            .replace(/(\d{4})(\d)/, '$1 $2')
+            .replace(/(\d{4}) (\d{4})(\d)/, '$1 $2 $3')
+            .replace(/(\d{4}) (\d{4}) (\d{4})(\d)/, '$1 $2 $3 $4')
+            .substring(0, 19);
+    });
+
+    // Validade: MM/AA
+    document.getElementById('validade').addEventListener('input', function(e) {
+        e.target.value = e.target.value
+            .replace(/\D/g, '')
+            .replace(/^(\d{2})(\d)/, '$1/$2')
+            .substring(0, 5);
+    });
+
+    // CVV: 000
+    document.getElementById('cvv').addEventListener('input', function(e) {
+        e.target.value = e.target.value
+            .replace(/\D/g, '')
+            .substring(0, 3);
+    });
+
+    // Busca CEP ao sair do campo
+    document.getElementById('cep').addEventListener('blur', buscarEndereco);
 }
 
-// Configura os eventos dos botões do formulário
-function configurarBotoes() {
-    // Botão Salvar - valida e envia o formulário
-    document.querySelector('.buttons button:nth-child(1)').addEventListener('click', function(e) {
-        e.preventDefault(); // Evita o comportamento padrão do formulário
-        salvarFormulario();
-    });
-    
-    // Botão Excluir - limpa todos os campos
-    document.querySelector('.buttons button:nth-child(2)').addEventListener('click', function(e) {
-        e.preventDefault(); // Evita o comportamento padrão do formulário
-        limparFormulario();
-    });
-    
-    // Botão Alterar - permite editar dados existentes
-    document.querySelector('.buttons button:nth-child(3)').addEventListener('click', function(e) {
-        e.preventDefault(); // Evita o comportamento padrão do formulário
-        alterarFormulario();
-    });
-}
-
-// Função chamada quando o formulário é submetido
-function Pegar() {
-    return validarFormulario();
-}
-
-// Valida todos os campos do formulário
+// Validação principal
 function validarFormulario() {
-    // Remove a classe 'erro' de todos os campos
-    document.querySelectorAll('input, select').forEach(function(campo) {
-        campo.classList.remove('erro');
+    let valido = true;
+    limparErros();
+
+    // Campos obrigatórios
+    const camposObrigatorios = [
+        'nome', 'cpf', 'rg', 'telefone', 
+        'email', 'estado', 'cep', 'endereco'
+    ];
+
+    camposObrigatorios.forEach(id => {
+        const campo = document.getElementById(id);
+        if (!campo.value.trim()) {
+            campo.classList.add('erro');
+            valido = false;
+        }
     });
 
-    // Variável para controlar se o formulário é válido
-    let formularioValido = true;
-
-    // Validação do Nome (não pode estar vazio)
-    const nome = document.getElementById('nome');
-    if (nome.value.trim() === '') {
-        nome.classList.add('erro');
-        formularioValido = false;
+    // Validações específicas
+    if (!validarCPF(document.getElementById('cpf').value.replace(/\D/g, ''))) {
+        document.getElementById('cpf').classList.add('erro');
+        valido = false;
     }
 
-    // Validação do CPF (deve ter 11 dígitos e ser válido)
-    const cpf = document.getElementById('cpf');
-    const cpfNumeros = cpf.value.replace(/\D/g, '');
-    if (cpfNumeros.length !== 11 || !validarCPF(cpfNumeros)) {
-        cpf.classList.add('erro');
-        formularioValido = false;
+    // Valida CEP
+    const cep = document.getElementById('cep').value.replace(/\D/g, '');
+    if (cep.length !== 8 || !cepValido) {
+        document.getElementById('cep').classList.add('erro');
+        valido = false;
     }
 
-    // Validação do Telefone (deve ter 10 ou 11 dígitos)
-    const telefone = document.getElementById('telefone');
-    const telefoneNumeros = telefone.value.replace(/\D/g, '');
-    if (telefoneNumeros.length < 10 || telefoneNumeros.length > 11) {
-        telefone.classList.add('erro');
-        formularioValido = false;
+    // Valida cartão apenas se preenchido
+    const cartao = document.getElementById('cartao').value.replace(/\s/g, '');
+    if (cartao && !validarCartao(cartao)) {
+        document.getElementById('cartao').classList.add('erro');
+        valido = false;
     }
 
-    // Validação do Email (deve ter formato válido)
-    const email = document.getElementById('email');
-    if (!validarEmail(email.value)) {
-        email.classList.add('erro');
-        formularioValido = false;
+    if (!valido) {
+        alert('Por favor, corrija os campos destacados!');
+        document.querySelector('.erro').focus();
     }
 
-    // Validação do Estado (deve estar selecionado)
-    const estado = document.getElementById('estado');
-    if (estado.value === '') {
-        estado.classList.add('erro');
-        formularioValido = false;
-    }
-
-    // Validação do CEP (deve ter 8 dígitos)
-    const cep = document.getElementById('cep');
-    const cepNumeros = cep.value.replace(/\D/g, '');
-    if (cepNumeros.length !== 8) {
-        cep.classList.add('erro');
-        formularioValido = false;
-    }
-
-    // Validação do Endereço (não pode estar vazio)
-    const endereco = document.getElementById('endereco');
-    if (endereco.value.trim() === '') {
-        endereco.classList.add('erro');
-        formularioValido = false;
-    }
-
-    // Se o formulário não for válido, mostra mensagem de erro
-    if (!formularioValido) {
-        alert('Por favor, corrija os campos destacados em vermelho!');
-        return false;
-    }
-
-    return true;
+    return valido;
 }
 
-// Função para validar CPF usando algoritmo oficial
-function validarCPF(cpf) {
-    // Verifica se todos os dígitos são iguais (ex: 111.111.111-11)
-    if (/^(\d)\1{10}$/.test(cpf)) return false;
+// Busca de endereço por CEP
+async function buscarEndereco() {
+    const cep = document.getElementById('cep').value.replace(/\D/g, '');
+    if (cep.length !== 8) return;
 
-    // Calcula o primeiro dígito verificador
-    let soma = 0;
-    for (let i = 0; i < 9; i++) {
-        soma += parseInt(cpf.charAt(i)) * (10 - i);
+    const endereco = document.getElementById('endereco');
+    endereco.disabled = true;
+    endereco.value = 'Buscando endereço...';
+    cepValido = false;
+
+    try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        
+        if (!response.ok) throw new Error('CEP não encontrado');
+        
+        const data = await response.json();
+        
+        if (data.erro) throw new Error('CEP não encontrado');
+        
+        endereco.value = [
+            data.logradouro,
+            data.bairro,
+            data.localidade,
+            data.uf
+        ].filter(Boolean).join(', ');
+        
+        cepValido = true;
+    } catch (error) {
+        alert('CEP inválido! Verifique o número.');
+        endereco.value = '';
+    } finally {
+        endereco.disabled = false;
     }
+}
+
+// Validação de CPF
+function validarCPF(cpf) {
+    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+    
+    let soma = 0;
+    for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i);
     let resto = (soma * 10) % 11;
     if (resto === 10 || resto === 11) resto = 0;
-    if (resto !== parseInt(cpf.charAt(9))) return false;
-
-    // Calcula o segundo dígito verificador
+    if (resto !== parseInt(cpf[9])) return false;
+    
     soma = 0;
-    for (let i = 0; i < 10; i++) {
-        soma += parseInt(cpf.charAt(i)) * (11 - i);
-    }
+    for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i);
     resto = (soma * 10) % 11;
-    if (resto === 10 || resto === 11) resto = 0;
-    if (resto !== parseInt(cpf.charAt(10))) return false;
-
-    return true;
+    return (resto === 10 ? 0 : resto) === parseInt(cpf[10]);
 }
 
-// Função para validar email com expressão regular simples
-function validarEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// Validação de Cartão (Luhn)
+function validarCartao(numero) {
+    let soma = 0;
+    let dobrar = false;
+    
+    for (let i = numero.length - 1; i >= 0; i--) {
+        let digito = parseInt(numero[i]);
+        if (dobrar) {
+            digito *= 2;
+            if (digito > 9) digito -= 9;
+        }
+        soma += digito;
+        dobrar = !dobrar;
+    }
+    
+    return soma % 10 === 0;
 }
 
-// Busca endereço usando a API ViaCEP
-function buscarEndereco(cep) {
-    // Mostra mensagem de carregamento
-    const endereco = document.getElementById('endereco');
-    endereco.value = 'Buscando endereço...';
-    
-    // Faz requisição para a API ViaCEP
-    fetch(`https://viacep.com.br/ws/${cep}/json/`)
-        .then(function(resposta) {
-            // Converte a resposta para JSON
-            return resposta.json();
-        })
-        .then(function(dados) {
-            // Se não encontrar o CEP, mostra mensagem de erro
-            if (dados.erro) {
-                endereco.value = '';
-                alert('CEP não encontrado!');
-                return;
-            }
-            
-            // Preenche o campo de endereço com os dados retornados
-            endereco.value = [
-                dados.logradouro || '',
-                dados.bairro || '',
-                dados.localidade || '',
-                dados.uf || ''
-            ].filter(Boolean).join(', ');
-        })
-        .catch(function() {
-            // Em caso de erro na requisição, mostra mensagem
-            endereco.value = '';
-            alert('Erro ao buscar CEP. Tente novamente mais tarde.');
-        });
-}
-
-// Função para salvar o formulário (envia os dados)
-function salvarFormulario() {
-    // Primeiro valida o formulário
-    if (!validarFormulario()) return;
-    
-    // Coleta todos os dados do formulário
-    const formData = {
-        nome: document.getElementById('nome').value,
-        cpf: document.getElementById('cpf').value,
-        telefone: document.getElementById('telefone').value,
-        email: document.getElementById('email').value,
-        estado: document.getElementById('estado').value,
-        cep: document.getElementById('cep').value,
-        endereco: document.getElementById('endereco').value
-    };
-    
-    // Simulação de envio para um servidor (substitua pela sua API real)
-    console.log('Dados a serem enviados:', formData);
-    
-    // Aqui você substituiria pelo fetch real para seu backend
-    // Exemplo com fetch (descomente e ajuste a URL):
-    /*
-    fetch('https://sua-api.com/formulario', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert('Formulário enviado com sucesso!');
-        console.log('Resposta do servidor:', data);
-    })
-    .catch(error => {
-        alert('Erro ao enviar formulário. Tente novamente.');
-        console.error('Erro:', error);
+// Limpeza de erros
+function limparErros() {
+    document.querySelectorAll('.erro').forEach(el => {
+        el.classList.remove('erro');
     });
-    */
-    
-    // Mostra mensagem de sucesso (simulada)
-    alert('Formulário salvo com sucesso!\n\n' + 
-          `Nome: ${formData.nome}\n` +
-          `CPF: ${formData.cpf}\n` +
-          `Telefone: ${formData.telefone}\n` +
-          `Email: ${formData.email}\n` +
-          `Estado: ${formData.estado}\n` +
-          `CEP: ${formData.cep}\n` +
-          `Endereço: ${formData.endereco}`);
-    
-    // Limpa o formulário após o envio
-    limparFormulario();
 }
 
-// Função para limpar todos os campos do formulário
+// Limpar formulário
 function limparFormulario() {
-    // Pede confirmação antes de limpar
-    if (!confirm('Tem certeza que deseja limpar todos os campos?')) return;
-    
-    // Reseta o formulário
-    document.getElementById('formulario').reset();
-    
-    // Remove todas as classes de erro
-    document.querySelectorAll('input, select').forEach(function(campo) {
-        campo.classList.remove('erro');
-    });
-}
-
-// Função para alterar dados (simulação)
-function alterarFormulario() {
-    // Primeiro valida o formulário
-    if (!validarFormulario()) return;
-    
-    // Simulação de alteração de dados
-    alert('Dados alterados com sucesso!');
-    
-    // Na implementação real, aqui você faria uma requisição para atualizar os dados no servidor
+    if (confirm('Tem certeza que deseja limpar todos os campos?')) {
+        document.getElementById('formulario').reset();
+        limparErros();
+        cepValido = false;
+    }
 }
